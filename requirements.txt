@@ -1,3 +1,4 @@
 nltk==3.10.3
 pytest==9.1.1
 streamlit==1.61.1
+matplotlib==3.11.1

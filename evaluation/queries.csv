@@ -1,0 +1,21 @@
+query_id,query_text,target_category
+Q01,crude oil prices,crude
+Q02,international trade deficit,trade
+Q03,corporate acquisition takeover,acq
+Q04,company earnings profit,earn
+Q05,foreign exchange dollar market,money-fx
+Q06,interest rates banking,interest
+Q07,coffee production exports,coffee
+Q08,gold prices market,gold
+Q09,wheat production exports,wheat
+Q10,corn crop production,corn
+Q11,sugar production prices,sugar
+Q12,natural gas production,nat-gas
+Q13,shipping freight vessels,ship
+Q14,copper prices production,copper
+Q15,cocoa production exports,cocoa
+Q16,cotton production exports,cotton
+Q17,cofee producion,coffee
+Q18,crude oil producion,crude
+Q19,international trad deficit,trade
+Q20,corporate aquisition takeover,acq
