@@ -1,0 +1,33 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# VS Code local settings
+.vscode/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Test/cache files
+.pytest_cache/
+.coverage
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Build/distribution files
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.log
