@@ -2,7 +2,19 @@
 
 import time
 
+import nltk
 import streamlit as st
+
+for resource_path, package_name in (
+    ("corpora/reuters", "reuters"),
+    ("tokenizers/punkt_tab", "punkt_tab"),
+    ("corpora/stopwords", "stopwords"),
+    ("corpora/wordnet", "wordnet"),
+):
+    try:
+        nltk.data.find(resource_path)
+    except LookupError:
+        nltk.download(package_name, quiet=True)
 
 from src.dataset import load_reuters_documents
 from src.indexing import InvertedIndex
