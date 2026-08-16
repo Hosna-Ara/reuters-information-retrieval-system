@@ -63,6 +63,30 @@ def write_summary_table(rows: list[dict[str, str]]) -> None:
         )
 
 
+def read_summary_table() -> list[dict[str, str]]:
+    """Read configuration metrics from the generated summary table."""
+    with TABLE_FILE.open(newline="", encoding="utf-8") as source:
+        reader = csv.DictReader(source)
+        required_columns = {
+            "configuration",
+            "precision_at_10",
+            "average_precision",
+            "ndcg_at_10",
+            "latency_ms",
+        }
+        missing_columns = required_columns - set(reader.fieldnames or [])
+        if missing_columns:
+            missing = ", ".join(sorted(missing_columns))
+            raise ValueError(f"Configuration summary is missing columns: {missing}")
+        rows = list(reader)
+
+    if len(rows) != 5:
+        raise ValueError(
+            f"Expected five configurations in the summary table, found {len(rows)}."
+        )
+    return rows
+
+
 def create_bar_plot(
     rows: list[dict[str, str]], metric: str, title: str, output_file: Path
 ) -> None:
@@ -85,6 +109,60 @@ def create_bar_plot(
     plt.close(figure)
 
 
+def create_effectiveness_comparison(rows: list[dict[str, str]]) -> Path:
+    """Create a grouped comparison of the three effectiveness metrics."""
+    output_file = FIGURES_DIR / "effectiveness_comparison.png"
+    labels = [f"C{index}" for index in range(1, len(rows) + 1)]
+    metrics = [
+        ("precision_at_10", "Precision@10"),
+        ("average_precision", "MAP"),
+        ("ndcg_at_10", "nDCG@10"),
+    ]
+    positions = list(range(len(rows)))
+    bar_width = 0.24
+
+    figure, axis = plt.subplots(figsize=(9, 6))
+    for metric_index, (column, display_name) in enumerate(metrics):
+        offset = (metric_index - 1) * bar_width
+        axis.bar(
+            [position + offset for position in positions],
+            [float(row[column]) for row in rows],
+            width=bar_width,
+            label=display_name,
+        )
+
+    axis.set_title("Retrieval Effectiveness Across Configurations")
+    axis.set_xlabel("Configuration")
+    axis.set_ylabel("Score")
+    axis.set_xticks(positions, labels)
+    axis.legend()
+    axis.grid(axis="y", linestyle="--", alpha=0.35)
+    figure.tight_layout()
+    figure.savefig(output_file, dpi=300)
+    plt.close(figure)
+    return output_file
+
+
+def create_latency_comparison(rows: list[dict[str, str]]) -> Path:
+    """Create a labelled comparison of mean online search latency."""
+    output_file = FIGURES_DIR / "latency_comparison.png"
+    labels = [f"C{index}" for index in range(1, len(rows) + 1)]
+    values = [float(row["latency_ms"]) for row in rows]
+
+    figure, axis = plt.subplots(figsize=(9, 6))
+    bars = axis.bar(labels, values, color="#35618f")
+    axis.set_title("Mean Online Search Latency Across Configurations")
+    axis.set_xlabel("Configuration")
+    axis.set_ylabel("Latency (ms)")
+    axis.set_ylim(0, max(values) * 1.15 if max(values) > 0 else 1)
+    axis.bar_label(bars, labels=[f"{value:.2f}" for value in values], padding=3)
+    axis.grid(axis="y", linestyle="--", alpha=0.35)
+    figure.tight_layout()
+    figure.savefig(output_file, dpi=300)
+    plt.close(figure)
+    return output_file
+
+
 def main() -> None:
     rows = read_mean_results()
     write_summary_table(rows)
@@ -98,6 +176,12 @@ def main() -> None:
     for metric, title, output_file in plots:
         create_bar_plot(rows, metric, title, output_file)
 
+    summary_rows = read_summary_table()
+    report_figures = [
+        create_effectiveness_comparison(summary_rows),
+        create_latency_comparison(summary_rows),
+    ]
+
     best_metrics = [
         ("Precision@10", "precision_at_10"),
         ("MAP", "average_precision"),
@@ -109,7 +193,11 @@ def main() -> None:
         print(f"Best by {display_metric}: {label} ({float(best[metric]):.3f})")
 
     print("Generated files:")
-    for path in [TABLE_FILE, *(output_file for _, _, output_file in plots)]:
+    for path in [
+        TABLE_FILE,
+        *(output_file for _, _, output_file in plots),
+        *report_figures,
+    ]:
         print(f"- {path.relative_to(PROJECT_ROOT)}")
 
 
