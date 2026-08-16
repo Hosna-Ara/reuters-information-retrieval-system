@@ -54,6 +54,14 @@ def show_sidebar(document_count: int) -> None:
         st.markdown(
             "**Advanced retrieval:** spelling correction + WordNet query expansion"
         )
+        st.divider()
+        st.markdown("#### How to use")
+        st.caption(
+            "Enter a short Reuters/news-related query such as 'oil prices middle east' "
+            "or 'coffee production'. Choose a ranking method and optional features, "
+            "then click Search to view the processed query and top matching Reuters "
+            "documents."
+        )
 
 
 def show_results(results: list[dict[str, object]]) -> None:
